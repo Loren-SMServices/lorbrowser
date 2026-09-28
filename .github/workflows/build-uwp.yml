@@ -19,6 +19,12 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet Packages
+      run: nuget restore LorBrowser.csproj
+
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
