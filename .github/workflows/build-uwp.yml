@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     strategy:
       matrix:
@@ -33,7 +33,7 @@ jobs:
 
     - name: Build UWP APPX Package (${{ matrix.targetPlatform }})
       run: |
-        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:AppxPackageDir=..\BuildOutput\ /p:UapAppxPackageBuildMode=SideLoadOnly /p:AppxPackageSigningEnabled=false
+        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:TargetPlatformVersion=10.0.19041.0 /p:WindowsTargetPlatformVersion=10.0.19041.0 /p:AppxPackageDir=..\BuildOutput\ /p:UapAppxPackageBuildMode=SideLoadOnly /p:AppxPackageSigningEnabled=false
 
     - name: Upload APPX Artifact
       uses: actions/upload-artifact@v4
