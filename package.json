@@ -1,0 +1,13 @@
+{
+  "name": "lorbrowser",
+  "version": "1.0.0",
+  "description": "Navegador Híbrido estable para Windows 10 Mobile",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["uwp", "windows10mobile", "browser", "user-agent", "spoofing"],
+  "author": "LorBrowser",
+  "license": "MIT"
+}

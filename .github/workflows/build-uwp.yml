@@ -1,0 +1,36 @@
+name: Build LorBrowser UWP for Windows 10 Mobile
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        targetPlatform: [ARM, x86]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Generate UWP PNG Assets
+      run: node generate_assets.js
+
+    - name: Build UWP APPX Package (${{ matrix.targetPlatform }})
+      run: |
+        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:AppxPackageDir=..\BuildOutput\ /p:AppxPackageOutput=..\BuildOutput\LorBrowser_${{ matrix.targetPlatform }}.appx /p:AppxPackageSigningEnabled=false
+
+    - name: Upload APPX Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LorBrowser_${{ matrix.targetPlatform }}_Appx
+        path: BuildOutput/

@@ -1,0 +1,12 @@
+node_modules/
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+BuildOutput/
+.DS_Store

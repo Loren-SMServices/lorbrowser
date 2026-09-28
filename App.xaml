@@ -1,0 +1,10 @@
+<Application
+    x:Class="LorBrowser.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    RequestedTheme="Dark">
+
+    <Application.Resources>
+        <!-- Fluent dark theme resources -->
+    </Application.Resources>
+</Application>

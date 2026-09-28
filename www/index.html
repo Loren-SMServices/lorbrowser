@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LorBrowser Mobile</title>
+    <style>
+/* LorBrowser - Windows 10 Mobile Responsive Design System (EdgeHTML 13 Compatible) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+html, body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background-color: #121212;
+}
+
+/* Header / Navigation Bar */
+.header-bar {
+    height: 56px;
+    background-color: #1e1e1e;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    z-index: 100;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.bottom-nav-mode .header-bar {
+    order: 2;
+    border-bottom: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.bottom-nav-mode #view-viewport {
+    order: 1;
+}
+
+/* Navigation Buttons */
+.btn-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.btn-icon:hover, .btn-icon:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+}
+
+.btn-icon .badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: #0078d4;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: bold;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Omnibox / URL Input */
+.omnibox-container {
+    flex: 1;
+    height: 42px;
+    background-color: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    position: relative;
+}
+
+.security-indicator {
+    color: #767676;
+    display: flex;
+    align-items: center;
+}
+
+.security-indicator.secure {
+    color: #107c41;
+}
+
+.security-indicator svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.url-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+}
+
+/* Viewport Area */
+#view-viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background-color: #121212;
+    height: calc(100% - 56px);
+}
+
+/* Tab Frame */
+.tab-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #ffffff;
+    display: none;
+}
+
+.tab-frame.active {
+    display: block;
+}
+
+/* Speed Dial Page */
+.speed-dial-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #141419;
+    background: linear-gradient(145deg, #141419 0%, #1a1a24 100%);
+    overflow-y: auto;
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+}
+
+.browser-logo-header {
+    margin: 10px 0 20px;
+    text-align: center;
+}
+
+.browser-logo-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #60a5fa;
+}
+
+.browser-logo-header p {
+    font-size: 13px;
+    color: #b0b0b0;
+    margin-top: 4px;
+}
+
+.ua-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: rgba(0, 120, 212, 0.2);
+    border: 1px solid rgba(0, 120, 212, 0.4);
+    color: #60a5fa;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.speed-dial-grid {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.dial-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    width: 70px;
+}
+
+.tile-icon {
+    width: 56px;
+    height: 56px;
+    background-color: #1e1e1e;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #0078d4;
+}
+
+.tile-label {
+    font-size: 11px;
+    color: #b0b0b0;
+    text-align: center;
+    max-width: 70px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Modals & Overlays */
+.overlay-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    display: none;
+}
+
+.overlay-panel.active {
+    display: flex;
+}
+
+.panel-header {
+    height: 56px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: #1e1e1e;
+}
+
+.panel-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Tabs Grid View */
+.tabs-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.tab-card {
+    width: 47%;
+    background-color: #1e1e1e;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-card.active-tab {
+    border-color: #0078d4;
+}
+
+.tab-card-header {
+    height: 36px;
+    background-color: #2a2a2a;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tab-card-title {
+    font-size: 12px;
+    color: #ffffff;
+}
+
+.tab-card-preview {
+    height: 100px;
+    background-color: #111111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #767676;
+    font-size: 12px;
+}
+
+.tab-card-close {
+    background: transparent;
+    border: none;
+    color: #b0b0b0;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* UA Switcher Cards */
+.ua-option-card {
+    background-color: #1e1e1e;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.ua-option-card.selected {
+    border-color: #0078d4;
+    background-color: rgba(0, 120, 212, 0.2);
+}
+
+.ua-info h4 {
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.ua-info p {
+    font-size: 12px;
+    color: #b0b0b0;
+}
+
+/* Toast notifications */
+.toast-container {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    z-index: 999;
+    display: none;
+}
+
+.toast-container.show {
+    display: block;
+}
+    </style>
+</head>
+<body>
+    <div id="app-container" class="bottom-nav-mode">
+        
+        <!-- Viewport container -->
+        <main id="view-viewport">
+            <!-- Speed Dial / New Tab view -->
+            <div id="speed-dial-view" class="speed-dial-page">
+                <div class="browser-logo-header">
+                    <h1>LorBrowser</h1>
+                    <p>Windows 10 Mobile Browser Engine</p>
+                    <div id="ua-status-pill" class="ua-status-pill">
+                        <span id="ua-active-name">📱 Chrome Mobile</span>
+                        <span>⚡</span>
+                    </div>
+                </div>
+
+                <div id="speed-dial-grid" class="speed-dial-grid">
+                    <!-- Dynamic Tiles injected via JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Omnibox & Navigation Bar -->
+        <header class="header-bar">
+            <!-- Back Button -->
+            <button id="btn-back" class="btn-icon" type="button" title="Atrás" aria-label="Atrás">
+                <svg viewBox="0 0 24 24"><path d="M20,11H7.83l5.59-5.59L12,4,4,12l8,8,1.41-1.41L7.83,13H20V11Z"/></svg>
+            </button>
+
+            <!-- Forward Button -->
+            <button id="btn-forward" class="btn-icon" type="button" title="Adelante" aria-label="Adelante">
+                <svg viewBox="0 0 24 24"><path d="M4,11h12.17l-5.59-5.59L12,4l8,8-8,8-1.41-1.41L16.17,13H4V11Z"/></svg>
+            </button>
+
+            <!-- URL Input / Omnibox -->
+            <form id="omnibox-form" class="omnibox-container" action="javascript:void(0);">
+                <div id="security-lock" class="security-indicator">
+                    <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                </div>
+                <input type="text" id="url-input" class="url-input" placeholder="Buscar o ingresar dirección..." autocomplete="off" spellcheck="false">
+                <button type="submit" id="btn-go" class="btn-icon" style="width:28px; height:28px; padding:0;" title="Ir">
+                    <svg viewBox="0 0 24 24" style="width:18px; height:18px;"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </form>
+
+            <!-- Tabs Button -->
+            <button id="btn-tabs" class="btn-icon" type="button" title="Pestañas" aria-label="Pestañas">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                <span id="tabs-badge" class="badge">1</span>
+            </button>
+
+            <!-- Menu Button -->
+            <button id="btn-menu" class="btn-icon" type="button" title="Menú" aria-label="Menú">
+                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+        </header>
+
+        <!-- OVERLAY: Tabs Switcher -->
+        <div id="tabs-overlay" class="overlay-panel">
+            <div class="panel-header">
+                <span class="panel-title">Pestañas abiertas</span>
+                <div style="display: flex; gap: 8px;">
+                    <button id="btn-new-tab" class="btn-icon" type="button" title="Nueva pestaña">
+                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    </button>
+                    <button class="btn-icon btn-close-overlay" type="button" data-target="tabs-overlay" title="Cerrar">✕</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div id="tabs-grid-container" class="tabs-grid"></div>
+            </div>
+        </div>
+
+        <!-- OVERLAY: User-Agent Switcher Modal -->
+        <div id="ua-overlay" class="overlay-panel">
+            <div class="panel-header">
+                <span class="panel-title">User-Agent Switcher (Spoofing)</span>
+                <button class="btn-icon btn-close-overlay" type="button" data-target="ua-overlay" title="Cerrar">✕</button>
+            </div>
+            <div class="panel-body">
+                <p style="font-size: 13px; color: #b0b0b0; margin-bottom: 10px;">
+                    Selecciona una identidad de navegador para omitir los avisos de incompatibilidad:
+                </p>
+                <div id="ua-options-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- OVERLAY: Bookmarks -->
+        <div id="bookmarks-overlay" class="overlay-panel">
+            <div class="panel-header">
+                <span class="panel-title">Marcadores y Favoritos</span>
+                <button class="btn-icon btn-close-overlay" type="button" data-target="bookmarks-overlay" title="Cerrar">✕</button>
+            </div>
+            <div class="panel-body">
+                <div id="bookmarks-list-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- OVERLAY: Main Menu -->
+        <div id="menu-overlay" class="overlay-panel">
+            <div class="panel-header">
+                <span class="panel-title">Opciones del Navegador</span>
+                <button class="btn-icon btn-close-overlay" type="button" data-target="menu-overlay" title="Cerrar">✕</button>
+            </div>
+            <div class="panel-body">
+                <div id="btn-add-bookmark" class="ua-option-card">
+                    <div style="font-size: 20px;">⭐</div>
+                    <div class="ua-info">
+                        <h4>Guardar en Marcadores</h4>
+                        <p>Añade la página actual a tus favoritos</p>
+                    </div>
+                </div>
+
+                <div id="btn-open-bookmarks" class="ua-option-card">
+                    <div style="font-size: 20px;">🔖</div>
+                    <div class="ua-info">
+                        <h4>Ver Marcadores</h4>
+                        <p>Lista de sitios web guardados</p>
+                    </div>
+                </div>
+
+                <div id="btn-open-ua" class="ua-option-card">
+                    <div style="font-size: 20px;">📱</div>
+                    <div class="ua-info">
+                        <h4>Configurar User-Agent (Spoofing)</h4>
+                        <p>Android, iPhone, Chrome PC, Firefox Mobile</p>
+                    </div>
+                </div>
+
+                <div id="toggle-bar-pos" class="ua-option-card">
+                    <div style="font-size: 20px;">↕️</div>
+                    <div class="ua-info">
+                        <h4>Cambiar Posición de Barra</h4>
+                        <p>Alternar entre parte inferior o superior</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-notification" class="toast-container">Notificación</div>
+
+    </div>
+
+    <!-- INLINE ENGINE SCRIPTS -->
+    <script>
+    /* UA Profiles */
+    var UAProfiles = {
+        activeKey: 'chrome_mobile',
+        profiles: {
+            chrome_mobile: {
+                id: 'chrome_mobile',
+                name: 'Chrome Mobile (Android 14)',
+                badge: 'Android',
+                icon: '📱',
+                ua: 'Mozilla/5.0 (Linux; Android 14; Mobile; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.165 Mobile Safari/537.36',
+                description: 'Recommended for modern web apps & video streaming'
+            },
+            safari_ios: {
+                id: 'safari_ios',
+                name: 'Safari Mobile (iOS 17.5)',
+                badge: 'iPhone',
+                icon: '🍎',
+                ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/605.1.15',
+                description: 'Best compatibility for mobile web layouts'
+            },
+            chrome_desktop: {
+                id: 'chrome_desktop',
+                name: 'Chrome Desktop (Windows 11)',
+                badge: 'PC / Desktop',
+                icon: '💻',
+                ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+                description: 'Forces full desktop versions of websites'
+            },
+            firefox_mobile: {
+                id: 'firefox_mobile',
+                name: 'Firefox Mobile',
+                badge: 'Firefox',
+                icon: '🦊',
+                ua: 'Mozilla/5.0 (Android 14; Mobile; rv:126.0) Gecko/126.0 Firefox/126.0',
+                description: 'Alternative mobile engine spoofing'
+            },
+            w10m_edge: {
+                id: 'w10m_edge',
+                name: 'Edge Mobile (Windows 10 Mobile Native)',
+                badge: 'W10M Native',
+                icon: '🟦',
+                ua: 'Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Microsoft; Lumia 950 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.15254',
+                description: 'Legacy native user-agent'
+            }
+        },
+        init: function() {
+            var saved = localStorage.getItem('lor_active_ua');
+            if (saved && this.profiles[saved]) this.activeKey = saved;
+        },
+        getActive: function() {
+            return this.profiles[this.activeKey] || this.profiles.chrome_mobile;
+        },
+        setActive: function(key) {
+            if (this.profiles[key]) {
+                this.activeKey = key;
+                localStorage.setItem('lor_active_ua', key);
+                return true;
+            }
+            return false;
+        }
+    };
+
+    /* UWP Bridge */
+    var UWPBridge = {
+        isUWP: false,
+        init: function() {
+            if (window.external && typeof window.external.notify === 'function') {
+                this.isUWP = true;
+            } else if (window.chrome && window.chrome.webview) {
+                this.isUWP = true;
+            }
+        },
+        sendToNative: function(action, payload) {
+            payload = payload || {};
+            var message = JSON.stringify({ action: action, data: payload });
+            if (window.external && typeof window.external.notify === 'function') {
+                window.external.notify(message);
+            } else if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(message);
+            }
+        },
+        updateUserAgent: function(uaString) {
+            this.sendToNative('SET_USER_AGENT', { userAgent: uaString });
+        }
+    };
+
+    /* Bookmark Manager */
+    var BookmarkManager = {
+        defaultSpeedDial: [
+            { title: 'Google', url: 'https://www.google.com', icon: '🔍', color: '#4285F4' },
+            { title: 'YouTube', url: 'https://m.youtube.com', icon: '▶️', color: '#FF0000' },
+            { title: 'Wikipedia', url: 'https://es.m.wikipedia.org', icon: '🌐', color: '#636466' },
+            { title: 'Reddit', url: 'https://m.reddit.com', icon: '🤖', color: '#FF4500' },
+            { title: 'Bing', url: 'https://www.bing.com', icon: '🔎', color: '#00838F' },
+            { title: 'GitHub', url: 'https://github.com', icon: '🐙', color: '#24292e' },
+            { title: 'X / Twitter', url: 'https://mobile.x.com', icon: '🐦', color: '#1DA1F2' },
+            { title: 'Noticias', url: 'https://news.google.com', icon: '📰', color: '#1A73E8' }
+        ],
+        getSpeedDial: function() {
+            var saved = localStorage.getItem('lor_speed_dial');
+            if (saved) { try { return JSON.parse(saved); } catch(e) {} }
+            return this.defaultSpeedDial;
+        },
+        getBookmarks: function() {
+            var saved = localStorage.getItem('lor_bookmarks');
+            if (saved) { try { return JSON.parse(saved); } catch(e) {} }
+            return [];
+        },
+        addBookmark: function(title, url) {
+            var list = this.getBookmarks();
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].url === url) return false;
+            }
+            list.push({ title: title || url, url: url, addedAt: new Date().toISOString() });
+            localStorage.setItem('lor_bookmarks', JSON.stringify(list));
+            return true;
+        },
+        removeBookmark: function(url) {
+            var list = this.getBookmarks();
+            var newList = [];
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].url !== url) newList.push(list[i]);
+            }
+            localStorage.setItem('lor_bookmarks', JSON.stringify(newList));
+        },
+        addHistory: function(title, url) {
+            if (!url || url.indexOf('about:') === 0) return;
+            var list = this.getBookmarks();
+            var newList = [{ title: title || url, url: url, timestamp: new Date().toISOString() }];
+            for (var i = 0; i < list.length && newList.length < 100; i++) {
+                if (list[i].url !== url) newList.push(list[i]);
+            }
+            localStorage.setItem('lor_history', JSON.stringify(newList));
+        }
+    };
+
+    /* Tab Manager */
+    function TabManager() {
+        this.tabs = [];
+        this.activeTabId = null;
+        this.containerEl = null;
+        this.onTabChangeCallbacks = [];
+    }
+
+    TabManager.prototype.init = function(containerEl) {
+        this.containerEl = containerEl;
+        this.createNewTab('Nueva pestaña', 'about:speeddial');
+    };
+
+    TabManager.prototype.createNewTab = function(title, url) {
+        title = title || 'Nueva pestaña';
+        url = url || 'about:speeddial';
+
+        var id = 'tab_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        var iframeEl = null;
+        if (url !== 'about:speeddial') {
+            iframeEl = document.createElement('iframe');
+            iframeEl.className = 'tab-frame';
+            iframeEl.id = id;
+            iframeEl.setAttribute('allow', 'fullscreen; autoplay; camera; microphone');
+            iframeEl.src = this.buildNavigationUrl(url);
+            this.containerEl.appendChild(iframeEl);
+        }
+
+        var tab = {
+            id: id,
+            title: title,
+            url: url,
+            isSpeedDial: url === 'about:speeddial',
+            iframeEl: iframeEl
+        };
+
+        this.tabs.push(tab);
+        this.switchToTab(id);
+        return tab;
+    };
+
+    TabManager.prototype.buildNavigationUrl = function(targetUrl) {
+        if (targetUrl.indexOf('about:') === 0 || targetUrl.indexOf('data:') === 0) return targetUrl;
+        if (window.UWPBridge && window.UWPBridge.isUWP) return targetUrl;
+
+        var activeUA = (window.UAProfiles && window.UAProfiles.getActive()) ? window.UAProfiles.getActive().ua : '';
+        var origin = window.location.origin || (window.location.protocol + '//' + window.location.host);
+        return origin + '/proxy?url=' + encodeURIComponent(targetUrl) + '&ua=' + encodeURIComponent(activeUA);
+    };
+
+    TabManager.prototype.switchToTab = function(tabId) {
+        var tab = null;
+        for (var i = 0; i < this.tabs.length; i++) {
+            if (this.tabs[i].id === tabId) { tab = this.tabs[i]; break; }
+        }
+        if (!tab) return;
+
+        this.activeTabId = tabId;
+        var frames = this.containerEl.querySelectorAll('.tab-frame');
+        for (var j = 0; j < frames.length; j++) {
+            frames[j].classList.remove('active');
+        }
+
+        var speedDial = document.getElementById('speed-dial-view');
+        if (tab.isSpeedDial) {
+            if (speedDial) speedDial.style.display = 'flex';
+        } else {
+            if (speedDial) speedDial.style.display = 'none';
+            if (tab.iframeEl) tab.iframeEl.classList.add('active');
+        }
+        this.notifyChange(tab);
+    };
+
+    TabManager.prototype.closeTab = function(tabId) {
+        if (this.tabs.length <= 1) {
+            this.navigateTab(this.tabs[0].id, 'about:speeddial');
+            return;
+        }
+
+        var index = -1;
+        for (var i = 0; i < this.tabs.length; i++) {
+            if (this.tabs[i].id === tabId) { index = i; break; }
+        }
+        if (index === -1) return;
+
+        if (this.tabs[index].iframeEl) this.tabs[index].iframeEl.remove();
+        this.tabs.splice(index, 1);
+
+        if (this.activeTabId === tabId) {
+            this.switchToTab(this.tabs[Math.max(0, index - 1)].id);
+        } else {
+            this.notifyChange(this.getActiveTab());
+        }
+    };
+
+    TabManager.prototype.navigateTab = function(tabId, url) {
+        var tab = null;
+        for (var i = 0; i < this.tabs.length; i++) {
+            if (this.tabs[i].id === tabId) { tab = this.tabs[i]; break; }
+        }
+        if (!tab) return;
+
+        var targetUrl = url.trim();
+        if (targetUrl !== 'about:speeddial') {
+            if (!/^https?:\/\//i.test(targetUrl) && targetUrl.indexOf('about:') !== 0) {
+                if (targetUrl.indexOf('.') !== -1 && targetUrl.indexOf(' ') === -1) {
+                    targetUrl = 'https://' + targetUrl;
+                } else {
+                    var engine = localStorage.getItem('lor_search_engine') || 'https://www.google.com/search?q=';
+                    targetUrl = engine + encodeURIComponent(targetUrl);
+                }
+            }
+        }
+
+        tab.url = targetUrl;
+        tab.isSpeedDial = targetUrl === 'about:speeddial';
+
+        if (tab.isSpeedDial) {
+            if (tab.iframeEl) { tab.iframeEl.remove(); tab.iframeEl = null; }
+            tab.title = 'Nueva pestaña';
+        } else {
+            if (!tab.iframeEl) {
+                var iframeEl = document.createElement('iframe');
+                iframeEl.className = 'tab-frame';
+                iframeEl.id = tab.id;
+                iframeEl.setAttribute('allow', 'fullscreen; autoplay; camera; microphone');
+                this.containerEl.appendChild(iframeEl);
+                tab.iframeEl = iframeEl;
+            }
+            try {
+                var parsed = new URL(targetUrl);
+                tab.title = parsed.hostname.replace('www.', '');
+            } catch(e) {
+                tab.title = targetUrl;
+            }
+            tab.iframeEl.src = this.buildNavigationUrl(targetUrl);
+        }
+
+        if (this.activeTabId === tabId) this.switchToTab(tabId);
+    };
+
+    TabManager.prototype.getActiveTab = function() {
+        for (var i = 0; i < this.tabs.length; i++) {
+            if (this.tabs[i].id === this.activeTabId) return this.tabs[i];
+        }
+        return this.tabs[0];
+    };
+
+    TabManager.prototype.onTabChange = function(cb) {
+        this.onTabChangeCallbacks.push(cb);
+    };
+
+    TabManager.prototype.notifyChange = function(activeTab) {
+        for (var i = 0; i < this.onTabChangeCallbacks.length; i++) {
+            this.onTabChangeCallbacks[i](activeTab, this.tabs);
+        }
+    };
+
+    /* App Controller */
+    function LorBrowserApp() {
+        this.tabManager = new TabManager();
+        this.barPosition = localStorage.getItem('lor_bar_pos') || 'bottom';
+    }
+
+    LorBrowserApp.prototype.init = function() {
+        UAProfiles.init();
+        UWPBridge.init();
+
+        var viewport = document.getElementById('view-viewport');
+        this.tabManager.init(viewport);
+
+        this.applyBarPosition(this.barPosition);
+        this.setupEventListeners();
+        this.renderSpeedDial();
+        this.renderUAOptions();
+        this.updateUAIndicator();
+
+        var self = this;
+        this.tabManager.onTabChange(function(activeTab, allTabs) {
+            self.updateOmnibox(activeTab);
+            self.updateTabCountBadge(allTabs.length);
+            self.renderTabsGrid(allTabs);
+            if (activeTab.url && !activeTab.isSpeedDial) {
+                BookmarkManager.addHistory(activeTab.title, activeTab.url);
+            }
+        });
+
+        var currentUA = UAProfiles.getActive();
+        UWPBridge.updateUserAgent(currentUA.ua);
+        window.appInstance = this;
+    };
+
+    LorBrowserApp.prototype.setupEventListeners = function() {
+        var self = this;
+        var omniboxForm = document.getElementById('omnibox-form');
+        var urlInput = document.getElementById('url-input');
+
+        var triggerNavigation = function() {
+            if (!urlInput) return;
+            var query = urlInput.value.trim();
+            if (query) {
+                var activeTab = self.tabManager.getActiveTab();
+                self.tabManager.navigateTab(activeTab.id, query);
+                urlInput.blur();
+            }
+        };
+
+        if (omniboxForm) {
+            omniboxForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                triggerNavigation();
+            });
+        }
+
+        if (urlInput) {
+            urlInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault();
+                    triggerNavigation();
+                }
+            });
+        }
+
+        var btnBack = document.getElementById('btn-back');
+        if (btnBack) btnBack.addEventListener('click', function() { self.handleBackPress(); });
+
+        var btnForward = document.getElementById('btn-forward');
+        if (btnForward) btnForward.addEventListener('click', function() { self.handleForwardPress(); });
+
+        var btnTabs = document.getElementById('btn-tabs');
+        if (btnTabs) btnTabs.addEventListener('click', function() { self.toggleOverlay('tabs-overlay', true); });
+
+        var btnMenu = document.getElementById('btn-menu');
+        if (btnMenu) btnMenu.addEventListener('click', function() { self.toggleOverlay('menu-overlay', true); });
+
+        var btnNewTab = document.getElementById('btn-new-tab');
+        if (btnNewTab) btnNewTab.addEventListener('click', function() {
+            self.tabManager.createNewTab('Nueva pestaña', 'about:speeddial');
+            self.toggleOverlay('tabs-overlay', false);
+        });
+
+        var overlayCloseBtns = document.querySelectorAll('.btn-close-overlay');
+        for (var i = 0; i < overlayCloseBtns.length; i++) {
+            overlayCloseBtns[i].addEventListener('click', function(e) {
+                var targetId = e.currentTarget.getAttribute('data-target');
+                if (targetId) self.toggleOverlay(targetId, false);
+            });
+        }
+
+        var uaPill = document.getElementById('ua-status-pill');
+        if (uaPill) uaPill.addEventListener('click', function() { self.toggleOverlay('ua-overlay', true); });
+
+        var btnOpenUA = document.getElementById('btn-open-ua');
+        if (btnOpenUA) btnOpenUA.addEventListener('click', function() {
+            self.toggleOverlay('menu-overlay', false);
+            self.toggleOverlay('ua-overlay', true);
+        });
+
+        var toggleBar = document.getElementById('toggle-bar-pos');
+        if (toggleBar) toggleBar.addEventListener('click', function() {
+            self.barPosition = self.barPosition === 'bottom' ? 'top' : 'bottom';
+            localStorage.setItem('lor_bar_pos', self.barPosition);
+            self.applyBarPosition(self.barPosition);
+            self.showToast('Barra colocada ' + (self.barPosition === 'bottom' ? 'abajo' : 'arriba'));
+        });
+
+        var btnOpenBookmarks = document.getElementById('btn-open-bookmarks');
+        if (btnOpenBookmarks) btnOpenBookmarks.addEventListener('click', function() {
+            self.toggleOverlay('menu-overlay', false);
+            self.renderBookmarksList();
+            self.toggleOverlay('bookmarks-overlay', true);
+        });
+
+        var btnAddBookmark = document.getElementById('btn-add-bookmark');
+        if (btnAddBookmark) btnAddBookmark.addEventListener('click', function() {
+            var active = self.tabManager.getActiveTab();
+            if (active && !active.isSpeedDial) {
+                var added = BookmarkManager.addBookmark(active.title, active.url);
+                self.showToast(added ? 'Marcador guardado' : 'Ya está en marcadores');
+            } else {
+                self.showToast('Abre una página web para guardarla');
+            }
+        });
+    };
+
+    LorBrowserApp.prototype.updateOmnibox = function(activeTab) {
+        var urlInput = document.getElementById('url-input');
+        var lockIcon = document.getElementById('security-lock');
+        if (!urlInput) return;
+
+        if (activeTab.isSpeedDial) {
+            urlInput.value = '';
+            urlInput.placeholder = 'Buscar o ingresar dirección web...';
+            if (lockIcon) lockIcon.className = 'security-indicator';
+        } else {
+            urlInput.value = activeTab.url;
+            if (lockIcon) {
+                var isSecure = activeTab.url.indexOf('https://') === 0;
+                lockIcon.className = isSecure ? 'security-indicator secure' : 'security-indicator';
+            }
+        }
+    };
+
+    LorBrowserApp.prototype.updateTabCountBadge = function(count) {
+        var badge = document.getElementById('tabs-badge');
+        if (badge) badge.textContent = count;
+    };
+
+    LorBrowserApp.prototype.applyBarPosition = function(pos) {
+        var app = document.getElementById('app-container');
+        if (pos === 'bottom') app.classList.add('bottom-nav-mode');
+        else app.classList.remove('bottom-nav-mode');
+    };
+
+    LorBrowserApp.prototype.toggleOverlay = function(overlayId, show) {
+        var el = document.getElementById(overlayId);
+        if (el) {
+            if (show) el.classList.add('active');
+            else el.classList.remove('active');
+        }
+    };
+
+    LorBrowserApp.prototype.renderSpeedDial = function() {
+        var grid = document.getElementById('speed-dial-grid');
+        if (!grid) return;
+
+        var items = BookmarkManager.getSpeedDial();
+        var html = '';
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            html += '<div class="dial-tile" onclick="window.appInstance.onSpeedDialClick(\'' + item.url + '\')">' +
+                '<div class="tile-icon" style="border-color: ' + item.color + '44; color: ' + item.color + '">' +
+                    item.icon +
+                '</div>' +
+                '<span class="tile-label">' + item.title + '</span>' +
+            '</div>';
+        }
+        grid.innerHTML = html;
+    };
+
+    LorBrowserApp.prototype.onSpeedDialClick = function(url) {
+        var active = this.tabManager.getActiveTab();
+        this.tabManager.navigateTab(active.id, url);
+    };
+
+    LorBrowserApp.prototype.renderUAOptions = function() {
+        var container = document.getElementById('ua-options-list');
+        if (!container) return;
+
+        var active = UAProfiles.getActive();
+        var keys = Object.keys(UAProfiles.profiles);
+        var html = '';
+        for (var i = 0; i < keys.length; i++) {
+            var p = UAProfiles.profiles[keys[i]];
+            var isSelected = (p.id === active.id) ? 'selected' : '';
+            html += '<div class="ua-option-card ' + isSelected + '" onclick="window.appInstance.selectUA(\'' + p.id + '\')">' +
+                '<div style="font-size: 24px;">' + p.icon + '</div>' +
+                '<div class="ua-info" style="flex: 1;">' +
+                    '<h4>' + p.name + '</h4>' +
+                    '<p>' + p.description + '</p>' +
+                '</div>' +
+                '<span class="ua-badge" style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 11px;">' +
+                    p.badge +
+                '</span>' +
+            '</div>';
+        }
+        container.innerHTML = html;
+    };
+
+    LorBrowserApp.prototype.selectUA = function(key) {
+        if (UAProfiles.setActive(key)) {
+            var profile = UAProfiles.getActive();
+            UWPBridge.updateUserAgent(profile.ua);
+            this.updateUAIndicator();
+            this.renderUAOptions();
+            this.toggleOverlay('ua-overlay', false);
+            this.showToast('User-Agent cambiado a ' + profile.name);
+
+            var active = this.tabManager.getActiveTab();
+            if (!active.isSpeedDial) this.tabManager.navigateTab(active.id, active.url);
+        }
+    };
+
+    LorBrowserApp.prototype.updateUAIndicator = function() {
+        var active = UAProfiles.getActive();
+        var label = document.getElementById('ua-active-name');
+        if (label) label.textContent = active.icon + ' ' + active.name;
+    };
+
+    LorBrowserApp.prototype.renderTabsGrid = function(allTabs) {
+        var grid = document.getElementById('tabs-grid-container');
+        if (!grid) return;
+
+        var html = '';
+        for (var i = 0; i < allTabs.length; i++) {
+            var t = allTabs[i];
+            var isActive = (t.id === this.tabManager.activeTabId) ? 'active-tab' : '';
+            html += '<div class="tab-card ' + isActive + '">' +
+                '<div class="tab-card-header">' +
+                    '<span class="tab-card-title">' + t.title + '</span>' +
+                    '<button class="tab-card-close" onclick="event.stopPropagation(); window.appInstance.tabManager.closeTab(\'' + t.id + '\')">✕</button>' +
+                '</div>' +
+                '<div class="tab-card-preview" onclick="window.appInstance.tabManager.switchToTab(\'' + t.id + '\'); window.appInstance.toggleOverlay(\'tabs-overlay\', false);">' +
+                    (t.isSpeedDial ? '🚀 Speed Dial' : '🌐 ' + t.title) +
+                '</div>' +
+            '</div>';
+        }
+        grid.innerHTML = html;
+    };
+
+    LorBrowserApp.prototype.renderBookmarksList = function() {
+        var container = document.getElementById('bookmarks-list-container');
+        if (!container) return;
+
+        var list = BookmarkManager.getBookmarks();
+        if (list.length === 0) {
+            container.innerHTML = '<p style="color: #767676; text-align: center; margin-top: 40px;">No tienes marcadores guardados aún.</p>';
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < list.length; i++) {
+            var b = list[i];
+            html += '<div class="ua-option-card" onclick="window.appInstance.onSpeedDialClick(\'' + b.url + '\'); window.appInstance.toggleOverlay(\'bookmarks-overlay\', false);">' +
+                '<div style="font-size: 20px;">🔖</div>' +
+                '<div class="ua-info" style="flex: 1;">' +
+                    '<h4>' + b.title + '</h4>' +
+                    '<p>' + b.url + '</p>' +
+                '</div>' +
+                '<button class="btn-icon" onclick="event.stopPropagation(); BookmarkManager.removeBookmark(\'' + b.url + '\'); window.appInstance.renderBookmarksList();">🗑️</button>' +
+            '</div>';
+        }
+        container.innerHTML = html;
+    };
+
+    LorBrowserApp.prototype.handleBackPress = function() {
+        var active = this.tabManager.getActiveTab();
+        if (active.iframeEl && active.iframeEl.contentWindow) {
+            try { active.iframeEl.contentWindow.history.back(); return; } catch(e) {}
+        }
+        if (!active.isSpeedDial) this.tabManager.navigateTab(active.id, 'about:speeddial');
+    };
+
+    LorBrowserApp.prototype.handleForwardPress = function() {
+        var active = this.tabManager.getActiveTab();
+        if (active.iframeEl && active.iframeEl.contentWindow) {
+            try { active.iframeEl.contentWindow.history.forward(); } catch(e) {}
+        }
+    };
+
+    LorBrowserApp.prototype.showToast = function(message) {
+        var toast = document.getElementById('toast-notification');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var app = new LorBrowserApp();
+        app.init();
+    });
+    </script>
+</body>
+</html>
