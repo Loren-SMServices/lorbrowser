@@ -64,6 +64,7 @@ if (!fs.existsSync(assetsDir)) {
 
 fs.writeFileSync(path.join(assetsDir, 'Square150x150Logo.png'), createSolidPNGBuffer(150, 150, 0, 120, 212));
 fs.writeFileSync(path.join(assetsDir, 'Square44x44Logo.png'), createSolidPNGBuffer(44, 44, 0, 120, 212));
+fs.writeFileSync(path.join(assetsDir, 'Wide310x150Logo.png'), createSolidPNGBuffer(310, 150, 0, 120, 212));
 fs.writeFileSync(path.join(assetsDir, 'StoreLogo.png'), createSolidPNGBuffer(50, 50, 0, 120, 212));
 fs.writeFileSync(path.join(assetsDir, 'SplashScreen.png'), createSolidPNGBuffer(620, 300, 18, 18, 18));
 

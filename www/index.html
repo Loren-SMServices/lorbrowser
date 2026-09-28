@@ -616,8 +616,11 @@ body {
     /* UWP Bridge */
     var UWPBridge = {
         isUWP: false,
+        hasNotify: function() {
+            try { return !!(window.external && ('notify' in window.external)); } catch(e) { return false; }
+        },
         init: function() {
-            if (window.external && typeof window.external.notify === 'function') {
+            if (this.hasNotify()) {
                 this.isUWP = true;
             } else if (window.chrome && window.chrome.webview) {
                 this.isUWP = true;
@@ -626,14 +629,28 @@ body {
         sendToNative: function(action, payload) {
             payload = payload || {};
             var message = JSON.stringify({ action: action, data: payload });
-            if (window.external && typeof window.external.notify === 'function') {
-                window.external.notify(message);
-            } else if (window.chrome && window.chrome.webview) {
-                window.chrome.webview.postMessage(message);
-            }
+            try {
+                if (this.hasNotify()) {
+                    window.external.notify(message);
+                } else if (window.chrome && window.chrome.webview) {
+                    window.chrome.webview.postMessage(message);
+                }
+            } catch(e) {}
+        },
+        handleNativeMessage: function(event) {
+            try {
+                var msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                if (!msg || !msg.action) return;
+                if (msg.action === 'hardwareBackPress' && window.appInstance) {
+                    window.appInstance.handleBackPress();
+                }
+            } catch(e) {}
         },
         updateUserAgent: function(uaString) {
             this.sendToNative('SET_USER_AGENT', { userAgent: uaString });
+        },
+        updateNavState: function(canGoBack) {
+            this.sendToNative('NAV_STATE', { canGoBack: !!canGoBack });
         }
     };
 
@@ -678,7 +695,8 @@ body {
         },
         addHistory: function(title, url) {
             if (!url || url.indexOf('about:') === 0) return;
-            var list = this.getBookmarks();
+            var list = [];
+            try { list = JSON.parse(localStorage.getItem('lor_history')) || []; } catch(e) {}
             var newList = [{ title: title || url, url: url, timestamp: new Date().toISOString() }];
             for (var i = 0; i < list.length && newList.length < 100; i++) {
                 if (list[i].url !== url) newList.push(list[i]);
@@ -872,10 +890,12 @@ body {
             if (activeTab.url && !activeTab.isSpeedDial) {
                 BookmarkManager.addHistory(activeTab.title, activeTab.url);
             }
+            UWPBridge.updateNavState(!activeTab.isSpeedDial || allTabs.length > 1);
         });
 
         var currentUA = UAProfiles.getActive();
         UWPBridge.updateUserAgent(currentUA.ua);
+        UWPBridge.updateNavState(false);
         window.appInstance = this;
     };
 
@@ -1127,7 +1147,11 @@ body {
         if (active.iframeEl && active.iframeEl.contentWindow) {
             try { active.iframeEl.contentWindow.history.back(); return; } catch(e) {}
         }
-        if (!active.isSpeedDial) this.tabManager.navigateTab(active.id, 'about:speeddial');
+        if (!active.isSpeedDial) {
+            this.tabManager.navigateTab(active.id, 'about:speeddial');
+        } else if (this.tabManager.tabs.length > 1) {
+            this.tabManager.closeTab(active.id);
+        }
     };
 
     LorBrowserApp.prototype.handleForwardPress = function() {
