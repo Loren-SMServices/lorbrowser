@@ -1,0 +1,65 @@
+name: Build LorBrowser UWP for Windows 10 Mobile
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        targetPlatform: [ARM, x86]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # CAMBIO: instala el SDK que coincide con TargetPlatformVersion del csproj
+    - name: Install Windows 10 SDK 19041
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
+      with:
+        sdk-version: 19041
+
+    # CAMBIO: diagnóstico, muestra en el log qué SDKs hay realmente
+    - name: List installed Windows SDKs
+      shell: pwsh
+      run: Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\UnionMetadata" | Select-Object Name
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet Packages
+      run: nuget restore LorBrowser.csproj
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Generate UWP PNG Assets
+      run: node generate_assets.js
+
+    # CAMBIO: certificado autofirmado (CN=LorBrowser, igual que Publisher del manifiesto).
+    # Windows 10 Mobile no instala paquetes sin firmar.
+    - name: Create signing certificate
+      shell: pwsh
+      run: |
+        $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=LorBrowser" -KeyUsage DigitalSignature -FriendlyName "LorBrowser" -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
+        $pwd = ConvertTo-SecureString -String "lorbrowser" -Force -AsPlainText
+        Export-PfxCertificate -Cert $cert -FilePath LorBrowser.pfx -Password $pwd | Out-Null
+        New-Item -ItemType Directory -Force BuildOutput | Out-Null
+        Export-Certificate -Cert $cert -FilePath BuildOutput\LorBrowser.cer | Out-Null
+
+    # CAMBIO: firma activada con el certificado anterior
+    - name: Build UWP APPX Package (${{ matrix.targetPlatform }})
+      run: |
+        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:GenerateAppxPackageOnBuild=true /p:AppxPackageDir="${{ github.workspace }}\BuildOutput" /p:UapAppxPackageBuildMode=SideLoadOnly /p:AppxBundle=Never /p:AppxPackageSigningEnabled=true /p:PackageCertificateKeyFile=LorBrowser.pfx /p:PackageCertificatePassword=lorbrowser
+
+    - name: Upload APPX Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LorBrowser_${{ matrix.targetPlatform }}_Appx
+        path: BuildOutput/
