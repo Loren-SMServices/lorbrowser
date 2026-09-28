@@ -12,8 +12,8 @@
     <DefaultLanguage>es-ES</DefaultLanguage>
     <TargetDeviceFamily>Windows.Universal</TargetDeviceFamily>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.17763.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.15063.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C56-D2A0-4CE8-B85E-C3E7EDF4A6C2};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -59,21 +59,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.2.14</Version>
+      <Version>5.*</Version>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Windows">
-      <IsWinMDFile>true</IsWinMDFile>
-      <HintPath Condition="Exists('$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata\10.0.19041.0\Windows.winmd')">$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata\10.0.19041.0\Windows.winmd</HintPath>
-      <HintPath Condition="Exists('$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata\10.0.17763.0\Windows.winmd')">$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata\10.0.17763.0\Windows.winmd</HintPath>
-      <HintPath Condition="Exists('$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata\10.0.22621.0\Windows.winmd')">$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata\10.0.22621.0\Windows.winmd</HintPath>
-      <HintPath Condition="Exists('$(ProgramFiles)\Windows Kits\10\UnionMetadata\10.0.19041.0\Windows.winmd')">$(ProgramFiles)\Windows Kits\10\UnionMetadata\10.0.19041.0\Windows.winmd</HintPath>
-      <HintPath Condition="Exists('$(ProgramFiles)\Windows Kits\10\UnionMetadata\10.0.17763.0\Windows.winmd')">$(ProgramFiles)\Windows Kits\10\UnionMetadata\10.0.17763.0\Windows.winmd</HintPath>
-      <HintPath Condition="Exists('$(ProgramFiles)\Windows Kits\10\UnionMetadata\10.0.22621.0\Windows.winmd')">$(ProgramFiles)\Windows Kits\10\UnionMetadata\10.0.22621.0\Windows.winmd</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

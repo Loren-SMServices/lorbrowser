@@ -19,6 +19,17 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    # CAMBIO: instala el SDK que coincide con TargetPlatformVersion del csproj
+    - name: Install Windows 10 SDK 19041
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
+      with:
+        sdk-version: 19041
+
+    # CAMBIO: diagnóstico, muestra en el log qué SDKs hay realmente
+    - name: List installed Windows SDKs
+      shell: pwsh
+      run: Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\UnionMetadata" | Select-Object Name
+
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
 
@@ -33,7 +44,7 @@ jobs:
 
     - name: Build UWP APPX Package (${{ matrix.targetPlatform }})
       run: |
-        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:TargetPlatformVersion=10.0.17763.0 /p:TargetPlatformMinVersion=10.0.17763.0 /p:GenerateAppxPackageOnBuild=true /p:AppxPackageDir="${{ github.workspace }}\BuildOutput" /p:UapAppxPackageBuildMode=SideLoadOnly /p:AppxPackageSigningEnabled=false /p:AppxBundle=Never
+        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:GenerateAppxPackageOnBuild=true /p:AppxPackageDir="${{ github.workspace }}\BuildOutput" /p:UapAppxPackageBuildMode=SideLoadOnly /p:AppxPackageSigningEnabled=false /p:AppxBundle=Never
 
     - name: Upload APPX Artifact
       uses: actions/upload-artifact@v4
