@@ -27,7 +27,7 @@ jobs:
 
     - name: Build UWP APPX Package (${{ matrix.targetPlatform }})
       run: |
-        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:AppxPackageDir=..\BuildOutput\ /p:AppxPackageOutput=..\BuildOutput\LorBrowser_${{ matrix.targetPlatform }}.appx /p:AppxPackageSigningEnabled=false
+        msbuild LorBrowser.csproj /p:Configuration=Release /p:Platform=${{ matrix.targetPlatform }} /p:AppxPackageDir=..\BuildOutput\ /p:UapAppxPackageBuildMode=SideLoadOnly /p:AppxPackageSigningEnabled=false
 
     - name: Upload APPX Artifact
       uses: actions/upload-artifact@v4
