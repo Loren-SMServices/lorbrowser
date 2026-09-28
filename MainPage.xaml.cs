@@ -23,17 +23,31 @@ namespace LorBrowser
 
         private async void SetupMobileStatusBar()
         {
-            // Windows 10 Mobile Status Bar integration
-            if (ApiInformation.IsTypePresent("Windows.UI.ViewManagement.StatusBar"))
+            try
             {
-                var statusBar = StatusBar.GetForCurrentView();
-                if (statusBar != null)
+                if (ApiInformation.IsTypePresent("Windows.UI.ViewManagement.StatusBar"))
                 {
-                    statusBar.BackgroundColor = Colors.Black;
-                    statusBar.BackgroundOpacity = 1.0;
-                    statusBar.ForegroundColor = Colors.White;
-                    await statusBar.ShowAsync();
+                    Type statusBarType = Type.GetType("Windows.UI.ViewManagement.StatusBar, Windows, ContentType=WindowsRuntime");
+                    if (statusBarType != null)
+                    {
+                        var getForCurrentViewMethod = statusBarType.GetMethod("GetForCurrentView");
+                        if (getForCurrentViewMethod != null)
+                        {
+                            dynamic statusBar = getForCurrentViewMethod.Invoke(null, null);
+                            if (statusBar != null)
+                            {
+                                statusBar.BackgroundColor = Colors.Black;
+                                statusBar.BackgroundOpacity = 1.0;
+                                statusBar.ForegroundColor = Colors.White;
+                                await statusBar.ShowAsync();
+                            }
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[StatusBar Error]: " + ex.Message);
             }
         }
 
