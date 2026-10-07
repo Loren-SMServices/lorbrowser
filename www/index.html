@@ -403,6 +403,32 @@ body {
 .toast-container.show {
     display: block;
 }
+.progress-bar-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: transparent;
+    z-index: 101;
+}
+
+.bottom-nav-mode .progress-bar-container {
+    bottom: auto;
+    top: 0;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #0078d4;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.progress-bar.loading {
+    opacity: 1;
+}
     </style>
 </head>
 <body>
@@ -429,6 +455,10 @@ body {
 
         <!-- Omnibox & Navigation Bar -->
         <header class="header-bar">
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div id="loading-progress" class="progress-bar"></div>
+            </div>
             <!-- Back Button -->
             <button id="btn-back" class="btn-icon" type="button" title="Atrás" aria-label="Atrás">
                 <svg viewBox="0 0 24 24"><path d="M20,11H7.83l5.59-5.59L12,4,4,12l8,8,1.41-1.41L7.83,13H20V11Z"/></svg>
@@ -510,6 +540,14 @@ body {
                 <button class="btn-icon btn-close-overlay" type="button" data-target="menu-overlay" title="Cerrar">✕</button>
             </div>
             <div class="panel-body">
+                <div id="btn-toggle-desktop" class="ua-option-card">
+                    <div style="font-size: 20px;">🖥️</div>
+                    <div class="ua-info">
+                        <h4 id="toggle-desktop-text">Ver como Ordenador</h4>
+                        <p>Cambio rápido de vista</p>
+                    </div>
+                </div>
+
                 <div id="btn-add-bookmark" class="ua-option-card">
                     <div style="font-size: 20px;">⭐</div>
                     <div class="ua-info">
@@ -845,6 +883,12 @@ body {
                 tab.title = targetUrl;
             }
             tab.iframeEl.src = this.buildNavigationUrl(targetUrl);
+            
+            // Simular inicio de carga al navegar
+            if (window.appInstance) window.appInstance.startLoadingProgress();
+            tab.iframeEl.onload = function() {
+                if (window.appInstance) window.appInstance.finishLoadingProgress();
+            };
         }
 
         if (this.activeTabId === tabId) this.switchToTab(tabId);
@@ -1000,6 +1044,19 @@ body {
             } else {
                 self.showToast('Abre una página web para guardarla');
             }
+        });
+
+        var btnToggleDesktop = document.getElementById('btn-toggle-desktop');
+        if (btnToggleDesktop) btnToggleDesktop.addEventListener('click', function() {
+            var activeUA = UAProfiles.getActive();
+            if (activeUA.id === 'chrome_desktop') {
+                self.selectUA('chrome_mobile');
+                self.showToast('Modo móvil activado');
+            } else {
+                self.selectUA('chrome_desktop');
+                self.showToast('Modo ordenador activado');
+            }
+            self.toggleOverlay('menu-overlay', false);
         });
     };
 
@@ -1234,6 +1291,33 @@ body {
             container.style.paddingBottom = '0px';
         }
         this.updateNavState();
+    };
+
+    LorBrowserApp.prototype.startLoadingProgress = function() {
+        var bar = document.getElementById('loading-progress');
+        if (!bar) return;
+        bar.style.width = '20%';
+        bar.classList.add('loading');
+        
+        var self = this;
+        if (this.progressInterval) clearInterval(this.progressInterval);
+        this.progressInterval = setInterval(function() {
+            var w = parseFloat(bar.style.width);
+            if (w < 85) {
+                bar.style.width = (w + (Math.random() * 10)) + '%';
+            }
+        }, 500);
+    };
+
+    LorBrowserApp.prototype.finishLoadingProgress = function() {
+        var bar = document.getElementById('loading-progress');
+        if (!bar) return;
+        if (this.progressInterval) clearInterval(this.progressInterval);
+        bar.style.width = '100%';
+        setTimeout(function() {
+            bar.classList.remove('loading');
+            setTimeout(function() { bar.style.width = '0%'; }, 300);
+        }, 400);
     };
 
     LorBrowserApp.prototype.handleForwardPress = function() {
