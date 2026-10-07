@@ -826,7 +826,11 @@ body.dark-mode .tab-frame {
 
     TabManager.prototype.buildNavigationUrl = function(targetUrl) {
         if (targetUrl.indexOf('about:') === 0 || targetUrl.indexOf('data:') === 0) return targetUrl;
-        if (window.UWPBridge && window.UWPBridge.isUWP) return targetUrl;
+        
+        // Si estamos en entorno UWP nativo (no en localhost de pruebas), usar URL directa
+        if (window.UWPBridge && window.UWPBridge.isUWP && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            return targetUrl;
+        }
 
         var activeUA = (window.UAProfiles && window.UAProfiles.getActive()) ? window.UAProfiles.getActive().ua : '';
         var origin = window.location.origin || (window.location.protocol + '//' + window.location.host);
