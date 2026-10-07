@@ -32,6 +32,20 @@ namespace LorBrowser
             ApplyUserAgent(currentCustomUA);
             SetupMobileStatusBar();
             SetupHardwareBackButton();
+            InitializeGeckoEngine();
+        }
+
+        private void InitializeGeckoEngine()
+        {
+            try
+            {
+                bool initialized = Engine.GeckoBridge.InitializeEngine();
+                Debug.WriteLine("[MainPage] Gecko Engine Status: " + (initialized ? "Active" : "Fallback to WebView"));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[MainPage] Gecko Init Exception: " + ex.Message);
+            }
         }
 
         private void ApplyUserAgent(string ua)
@@ -39,6 +53,7 @@ namespace LorBrowser
             try
             {
                 int hr = UrlMkSetSessionOption(URLMON_OPTION_USERAGENT, ua, ua.Length, 0);
+                Engine.GeckoBridge.SetUserAgent(ua);
                 Debug.WriteLine("[Native UA Set] hr=" + hr + " ua=" + ua);
             }
             catch (Exception ex)
