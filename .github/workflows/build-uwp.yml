@@ -42,6 +42,34 @@ jobs:
     - name: Generate UWP PNG Assets
       run: node generate_assets.js
 
+    - name: Download and inject Gecko Engine (Option B)
+      shell: pwsh
+      run: |
+        Write-Host "Fetching latest Gecko engine release..."
+        $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/Computershik73/gecko-w10m/releases/latest"
+        
+        # Determine architecture to download
+        $arch = "${{ matrix.targetPlatform }}"
+        if ($arch -eq "x86") {
+            # Usually there's no x86 for this specific port, but we try anyway
+            $asset = $releaseInfo.assets | Where-Object { $_.name -like "*_x86.appx" }
+        } else {
+            $asset = $releaseInfo.assets | Where-Object { $_.name -like "*_ARM.appx" }
+        }
+        
+        if ($asset) {
+            Write-Host "Downloading $($asset.name)..."
+            Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "gecko.zip"
+            Write-Host "Extracting binaries..."
+            Expand-Archive -Path "gecko.zip" -DestinationPath "gecko_extracted" -Force
+            New-Item -ItemType Directory -Force native | Out-Null
+            Copy-Item -Path "gecko_extracted\*.dll" -Destination "native\" -Force -ErrorAction SilentlyContinue
+            Copy-Item -Path "gecko_extracted\*.winmd" -Destination "native\" -Force -ErrorAction SilentlyContinue
+            Write-Host "Gecko binaries successfully injected into native/ folder."
+        } else {
+            Write-Host "Warning: Could not find a Gecko release asset for $arch."
+        }
+
     # CAMBIO: certificado autofirmado (CN=LorBrowser, igual que Publisher del manifiesto).
     # Windows 10 Mobile no instala paquetes sin firmar.
     - name: Create signing certificate
