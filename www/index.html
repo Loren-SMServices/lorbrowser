@@ -643,6 +643,10 @@ body {
                 if (!msg || !msg.action) return;
                 if (msg.action === 'hardwareBackPress' && window.appInstance) {
                     window.appInstance.handleBackPress();
+                } else if (msg.action === 'KEYBOARD_SHOWING' && window.appInstance) {
+                    window.appInstance.handleKeyboardShowing(msg.height || 0);
+                } else if (msg.action === 'KEYBOARD_HIDING' && window.appInstance) {
+                    window.appInstance.handleKeyboardHiding();
                 }
             } catch(e) {}
         },
@@ -922,6 +926,13 @@ body {
         }
 
         if (urlInput) {
+            urlInput.addEventListener('focus', function() {
+                urlInput.select();
+                self.updateNavState();
+            });
+            urlInput.addEventListener('blur', function() {
+                self.updateNavState();
+            });
             urlInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     e.preventDefault();
@@ -1143,15 +1154,86 @@ body {
     };
 
     LorBrowserApp.prototype.handleBackPress = function() {
+        // 1. Si hay menús u overlays abiertos, cerrarlos primero
+        var activeOverlays = document.querySelectorAll('.overlay-panel.active');
+        if (activeOverlays && activeOverlays.length > 0) {
+            for (var i = 0; i < activeOverlays.length; i++) {
+                activeOverlays[i].classList.remove('active');
+            }
+            this.updateNavState();
+            return true;
+        }
+
+        // 2. Si el omnibox/teclado está enfocado, quitar el foco
+        var urlInput = document.getElementById('url-input');
+        if (urlInput && document.activeElement === urlInput) {
+            urlInput.blur();
+            this.updateNavState();
+            return true;
+        }
+
+        // 3. Navegar atrás en la historia de la pestaña activa
         var active = this.tabManager.getActiveTab();
         if (active.iframeEl && active.iframeEl.contentWindow) {
-            try { active.iframeEl.contentWindow.history.back(); return; } catch(e) {}
+            try {
+                if (active.iframeEl.contentWindow.history.length > 1) {
+                    active.iframeEl.contentWindow.history.back();
+                    this.updateNavState();
+                    return true;
+                }
+            } catch(e) {}
         }
+
+        // 4. Si la pestaña actual no es SpeedDial, volver al SpeedDial
         if (!active.isSpeedDial) {
             this.tabManager.navigateTab(active.id, 'about:speeddial');
-        } else if (this.tabManager.tabs.length > 1) {
-            this.tabManager.closeTab(active.id);
+            this.updateNavState();
+            return true;
         }
+
+        // 5. Si hay más de una pestaña abierta, cerrar la pestaña actual
+        if (this.tabManager.tabs.length > 1) {
+            this.tabManager.closeTab(active.id);
+            this.updateNavState();
+            return true;
+        }
+
+        // Permitir que el sistema suspenda o cierre la app si estamos en la pestaña principal de SpeedDial
+        this.updateNavState();
+        return false;
+    };
+
+    LorBrowserApp.prototype.updateNavState = function() {
+        var activeOverlays = document.querySelectorAll('.overlay-panel.active');
+        var urlInput = document.getElementById('url-input');
+        var inputHasFocus = urlInput && document.activeElement === urlInput;
+        var activeTab = this.tabManager.getActiveTab();
+        var canGoBack = (activeOverlays && activeOverlays.length > 0) ||
+                         inputHasFocus ||
+                         !activeTab.isSpeedDial ||
+                         (this.tabManager.tabs.length > 1);
+
+        UWPBridge.updateNavState(canGoBack);
+    };
+
+    LorBrowserApp.prototype.handleKeyboardShowing = function(keyboardHeight) {
+        var container = document.getElementById('app-container');
+        if (container) {
+            container.style.paddingBottom = keyboardHeight + 'px';
+        }
+        var urlInput = document.getElementById('url-input');
+        if (urlInput && document.activeElement === urlInput) {
+            urlInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        this.updateNavState();
+    };
+
+    LorBrowserApp.prototype.handleKeyboardHiding = function() {
+        var container = document.getElementById('app-container');
+        if (container) {
+            container.style.paddingBottom = '0px';
+        }
+        this.updateNavState();
     };
 
     LorBrowserApp.prototype.handleForwardPress = function() {

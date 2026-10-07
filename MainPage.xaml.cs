@@ -32,6 +32,7 @@ namespace LorBrowser
             ApplyUserAgent(currentCustomUA);
             SetupMobileStatusBar();
             SetupHardwareBackButton();
+            SetupKeyboardInputPane();
             InitializeGeckoEngine();
         }
 
@@ -98,6 +99,47 @@ namespace LorBrowser
         private void SetupHardwareBackButton()
         {
             SystemNavigationManager.GetForCurrentView().BackRequested += OnHardwareBackRequested;
+        }
+
+        private void SetupKeyboardInputPane()
+        {
+            try
+            {
+                var inputPane = InputPane.GetForCurrentView();
+                inputPane.Showing += OnInputPaneShowing;
+                inputPane.Hiding += OnInputPaneHiding;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[InputPane Setup Error]: " + ex.Message);
+            }
+        }
+
+        private async void OnInputPaneShowing(InputPane sender, InputPaneVisibilityEventArgs e)
+        {
+            try
+            {
+                double keyboardHeight = e.OccludedRect.Height;
+                string script = $"if (window.UWPBridge && window.UWPBridge.handleNativeMessage) {{ window.UWPBridge.handleNativeMessage({{ data: JSON.stringify({{ action: 'KEYBOARD_SHOWING', height: {keyboardHeight} }}) }}); }}";
+                await MainWebView.InvokeScriptAsync("eval", new[] { script });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[InputPane Showing Error]: " + ex.Message);
+            }
+        }
+
+        private async void OnInputPaneHiding(InputPane sender, InputPaneVisibilityEventArgs e)
+        {
+            try
+            {
+                string script = "if (window.UWPBridge && window.UWPBridge.handleNativeMessage) { window.UWPBridge.handleNativeMessage({ data: JSON.stringify({ action: 'KEYBOARD_HIDING' }) }); }";
+                await MainWebView.InvokeScriptAsync("eval", new[] { script });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[InputPane Hiding Error]: " + ex.Message);
+            }
         }
 
         private async void OnHardwareBackRequested(object sender, BackRequestedEventArgs e)
