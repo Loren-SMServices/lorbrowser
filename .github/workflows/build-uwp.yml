@@ -2,9 +2,9 @@ name: Build LorBrowser UWP for Windows 10 Mobile
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, feature/gecko-engine ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, feature/gecko-engine ]
   workflow_dispatch:
 
 jobs:
