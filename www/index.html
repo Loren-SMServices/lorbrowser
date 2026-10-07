@@ -439,6 +439,22 @@ body {
     display: block;
     margin-top: 4px;
 }
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #000000 !important;
+}
+body.dark-mode .header-bar,
+body.dark-mode .overlay-panel,
+body.dark-mode .panel-header,
+body.dark-mode .speed-dial-page {
+    background-color: #111111 !important;
+    border-color: #333333 !important;
+}
+body.dark-mode .tab-frame {
+    filter: invert(1) hue-rotate(180deg) brightness(0.85);
+    background-color: #ffffff;
+}
     </style>
 </head>
 <body>
@@ -550,6 +566,14 @@ body {
                 <button class="btn-icon btn-close-overlay" type="button" data-target="menu-overlay" title="Cerrar">✕</button>
             </div>
             <div class="panel-body">
+                <div id="btn-toggle-darkmode" class="ua-option-card">
+                    <div style="font-size: 20px;">🌙</div>
+                    <div class="ua-info">
+                        <h4 id="toggle-darkmode-text">Modo Oscuro</h4>
+                        <p>Forzar fondo oscuro en webs</p>
+                    </div>
+                </div>
+
                 <div id="btn-toggle-desktop" class="ua-option-card">
                     <div style="font-size: 20px;">🖥️</div>
                     <div class="ua-info">
@@ -969,6 +993,7 @@ body {
     function LorBrowserApp() {
         this.tabManager = new TabManager();
         this.barPosition = localStorage.getItem('lor_bar_pos') || 'bottom';
+        this.isDarkMode = localStorage.getItem('lor_dark_mode') === 'true';
     }
 
     LorBrowserApp.prototype.init = function() {
@@ -979,6 +1004,7 @@ body {
         this.tabManager.init(viewport);
 
         this.applyBarPosition(this.barPosition);
+        this.applyDarkMode(this.isDarkMode);
         this.setupEventListeners();
         this.renderSpeedDial();
         this.renderUAOptions();
@@ -1100,6 +1126,13 @@ body {
             }
         });
 
+        var btnToggleDarkMode = document.getElementById('btn-toggle-darkmode');
+        if (btnToggleDarkMode) btnToggleDarkMode.addEventListener('click', function() {
+            self.applyDarkMode(!self.isDarkMode);
+            self.showToast(self.isDarkMode ? 'Modo Oscuro activado' : 'Modo Oscuro desactivado');
+            self.toggleOverlay('menu-overlay', false);
+        });
+
         var btnToggleDesktop = document.getElementById('btn-toggle-desktop');
         if (btnToggleDesktop) btnToggleDesktop.addEventListener('click', function() {
             var activeUA = UAProfiles.getActive();
@@ -1141,6 +1174,16 @@ body {
         var app = document.getElementById('app-container');
         if (pos === 'bottom') app.classList.add('bottom-nav-mode');
         else app.classList.remove('bottom-nav-mode');
+    };
+
+    LorBrowserApp.prototype.applyDarkMode = function(enabled) {
+        this.isDarkMode = enabled;
+        localStorage.setItem('lor_dark_mode', enabled);
+        if (enabled) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
     };
 
     LorBrowserApp.prototype.toggleOverlay = function(overlayId, show) {
