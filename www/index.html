@@ -926,6 +926,43 @@ body.dark-mode .tab-frame {
             }
         }
 
+        // --- OPTIMIZADORES W10M ---
+        try {
+            if (targetUrl.indexOf('http') === 0) {
+                var urlObj = new URL(targetUrl);
+                
+                // 1. YouTube Optimizer (Previene cierres por falta de RAM / Bloqueos de Iframe)
+                if (urlObj.hostname.indexOf('youtube.com') !== -1 || urlObj.hostname.indexOf('youtu.be') !== -1) {
+                    var v = urlObj.searchParams.get('v');
+                    if (!v && urlObj.hostname.indexOf('youtu.be') !== -1) {
+                        v = urlObj.pathname.substring(1);
+                    }
+                    if (v) {
+                        // Forzar reproductor ligero embebido (no bloquea iframes y gasta 90% menos RAM)
+                        targetUrl = 'https://www.youtube-nocookie.com/embed/' + v + '?autoplay=1';
+                    } else if (urlObj.pathname === '/' || urlObj.pathname === '') {
+                        // Para la home, intentar forzar la versión ultra-ligera
+                        targetUrl = 'https://m.youtube.com/?app=m&persist_app=1';
+                    }
+                }
+                
+                // 2. TikTok Optimizer (Evita página en blanco por bloqueos CORS/CSP)
+                if (urlObj.hostname.indexOf('tiktok.com') !== -1) {
+                    var videoMatch = urlObj.pathname.match(/\/video\/(\d+)/);
+                    if (videoMatch && videoMatch[1]) {
+                        // Forzar embebido de video
+                        targetUrl = 'https://www.tiktok.com/embed/v2/' + videoMatch[1];
+                    } else if (urlObj.hostname !== 'm.tiktok.com' && !urlObj.pathname.includes('/embed/')) {
+                        // Redirigir a versión móvil básica
+                        targetUrl = 'https://m.tiktok.com' + urlObj.pathname + urlObj.search;
+                    }
+                }
+            }
+        } catch(e) {
+            console.error('Error en optimizador de URL:', e);
+        }
+        // --------------------------
+
         tab.url = targetUrl;
         tab.isSpeedDial = targetUrl === 'about:speeddial';
 
