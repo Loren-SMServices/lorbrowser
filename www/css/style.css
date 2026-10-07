@@ -85,6 +85,7 @@ body {
     z-index: 100;
     position: relative;
     flex-shrink: 0;
+    order: 1;
 }
 
 .bottom-nav-mode .header-bar {
@@ -194,6 +195,7 @@ body {
     overflow: hidden;
     background-color: #121212;
     height: calc(100% - 56px);
+    order: 2;
 }
 
 /* Tab Frame */
