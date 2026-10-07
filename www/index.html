@@ -429,6 +429,16 @@ body {
 .progress-bar.loading {
     opacity: 1;
 }
+
+.tab-card.suspended { opacity: 0.6; }
+.tab-card.suspended .tab-card-preview { border: 1px solid #ff9800; }
+.tab-card-suspended-badge {
+    color: #ff9800;
+    font-size: 11px;
+    font-weight: bold;
+    display: block;
+    margin-top: 4px;
+}
     </style>
 </head>
 <body>
@@ -780,7 +790,9 @@ body {
             title: title,
             url: url,
             isSpeedDial: url === 'about:speeddial',
-            iframeEl: iframeEl
+            iframeEl: iframeEl,
+            lastAccessed: Date.now(),
+            isSuspended: false
         };
 
         this.tabs.push(tab);
@@ -797,6 +809,28 @@ body {
         return origin + '/proxy?url=' + encodeURIComponent(targetUrl) + '&ua=' + encodeURIComponent(activeUA);
     };
 
+    TabManager.prototype.manageMemory = function() {
+        var MAX_ALIVE = 1; // Conservar solo 1 pestaña en segundo plano cargada
+        var aliveTabs = [];
+        for (var i = 0; i < this.tabs.length; i++) {
+            var t = this.tabs[i];
+            if (t.id !== this.activeTabId && !t.isSpeedDial && !t.isSuspended) {
+                aliveTabs.push(t);
+            }
+        }
+        
+        aliveTabs.sort(function(a, b) { return (a.lastAccessed || 0) - (b.lastAccessed || 0); });
+        
+        while (aliveTabs.length > MAX_ALIVE) {
+            var tabToSuspend = aliveTabs.shift();
+            tabToSuspend.isSuspended = true;
+            if (tabToSuspend.iframeEl) {
+                tabToSuspend.iframeEl.remove();
+                tabToSuspend.iframeEl = null;
+            }
+        }
+    };
+
     TabManager.prototype.switchToTab = function(tabId) {
         var tab = null;
         for (var i = 0; i < this.tabs.length; i++) {
@@ -805,6 +839,24 @@ body {
         if (!tab) return;
 
         this.activeTabId = tabId;
+        tab.lastAccessed = Date.now();
+        
+        // Restaurar pestaña suspendida
+        if (tab.isSuspended && !tab.isSpeedDial) {
+            tab.isSuspended = false;
+            tab.iframeEl = document.createElement('iframe');
+            tab.iframeEl.className = 'tab-frame active';
+            tab.iframeEl.id = tab.id;
+            tab.iframeEl.setAttribute('allow', 'fullscreen; autoplay; camera; microphone');
+            tab.iframeEl.src = this.buildNavigationUrl(tab.url);
+            
+            if (window.appInstance) window.appInstance.startLoadingProgress();
+            tab.iframeEl.onload = function() {
+                if (window.appInstance) window.appInstance.finishLoadingProgress();
+            };
+            this.containerEl.appendChild(tab.iframeEl);
+        }
+
         var frames = this.containerEl.querySelectorAll('.tab-frame');
         for (var j = 0; j < frames.length; j++) {
             frames[j].classList.remove('active');
@@ -817,6 +869,7 @@ body {
             if (speedDial) speedDial.style.display = 'none';
             if (tab.iframeEl) tab.iframeEl.classList.add('active');
         }
+        this.manageMemory();
         this.notifyChange(tab);
     };
 
@@ -868,6 +921,7 @@ body {
             if (tab.iframeEl) { tab.iframeEl.remove(); tab.iframeEl = null; }
             tab.title = 'Nueva pestaña';
         } else {
+            tab.isSuspended = false;
             if (!tab.iframeEl) {
                 var iframeEl = document.createElement('iframe');
                 iframeEl.className = 'tab-frame';
@@ -1172,13 +1226,15 @@ body {
         for (var i = 0; i < allTabs.length; i++) {
             var t = allTabs[i];
             var isActive = (t.id === this.tabManager.activeTabId) ? 'active-tab' : '';
-            html += '<div class="tab-card ' + isActive + '">' +
+            var isSuspendedClass = t.isSuspended ? 'suspended' : '';
+            html += '<div class="tab-card ' + isActive + ' ' + isSuspendedClass + '">' +
                 '<div class="tab-card-header">' +
                     '<span class="tab-card-title">' + t.title + '</span>' +
                     '<button class="tab-card-close" onclick="event.stopPropagation(); window.appInstance.tabManager.closeTab(\'' + t.id + '\')">✕</button>' +
                 '</div>' +
                 '<div class="tab-card-preview" onclick="window.appInstance.tabManager.switchToTab(\'' + t.id + '\'); window.appInstance.toggleOverlay(\'tabs-overlay\', false);">' +
                     (t.isSpeedDial ? '🚀 Speed Dial' : '🌐 ' + t.title) +
+                    (t.isSuspended ? '<span class="tab-card-suspended-badge">Zz - Suspendida (RAM)</span>' : '') +
                 '</div>' +
             '</div>';
         }
